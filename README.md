@@ -1,9 +1,11 @@
 # INMTD
 Integrative Non-negative Matrix and Tensor Decomposition
 
-INMTD (**I**ntegrative **N**on-negative **M**atrix and **T**ensor **D**ecomposition) is a novel multi-view clustering method which integrates 2D and 3D datasets for joint clustering and removes confounding effects. It learns an embedding matrix for each data dimension and subgroups the individuals from their embedding after removing vectors in the embedding space that are linked with confounders. More specifically, INMTD combines nonnegative matrix tri-factorization (NMTF) [1] and nonnegative Tucker decomposition (NTD) [2] to cluster subjects with multi-view data regardless of their dimensionality. We assume $p_1$ subjects described by two data views, a 2D matrix $X_12 \in \R_+^(p_1 \times p_2)$ of $p_2$ features and a 3D tensor $\mathcal{X}_134 \in \R_+^(p_1 \times p_3 \times p_4)$ of $p_3$ features with $p_4$ channels, both nonnegative. The aim of our method is to jointly compute the embedding matrices for each dimension and cluster the $p_1$ subjects based on its specific embedding.
+INMTD (**I**ntegrative **N**on-negative **M**atrix and **T**ensor **D**ecomposition) is a novel multi-view clustering method which integrates 2D and 3D datasets for joint clustering and removes confounding effects. It learns an embedding matrix for each data dimension and subgroups the individuals from their embedding after removing vectors in the embedding space that are linked with confounders. More specifically, INMTD combines nonnegative matrix tri-factorization (NMTF) [1] and nonnegative Tucker decomposition (NTD) [2] to cluster subjects with multi-view data regardless of their dimensionality. We assume $`p_1`$ subjects described by two data views, a 2D matrix $`X_12 \in \R_+^(p_1 \times p_2)`$ of $p_2$ features and a 3D tensor $\mathcal{X}_134 \in \R_+^(p_1 \times p_3 \times p_4)$ of $p_3$ features with $p_4$ channels, both nonnegative. The aim of our method is to jointly compute the embedding matrices for each dimension and cluster the $p_1$ subjects based on its specific embedding.
 The objective function of INMTD is as follows:
-$$ \min_{G_i \geq 0, S_12 \geq 0, S_134 \geq 0}⁡ J=(\| X_12 - G_1 S_12 G_2^T \|)_F^2 + (\| X_134 - S_134 ×_1 G_1 ×_2 G_3 ×_3 G_4 \|)_F^2, \mathrm{s.t.}  G_1^T G_1=I $$
+```math
+\min_{G_i \geq 0, S_12 \geq 0, S_134 \geq 0}⁡ J=(\| X_12 - G_1 S_12 G_2^T \|)_F^2 + (\| X_134 - S_134 ×_1 G_1 ×_2 G_3 ×_3 G_4 \|)_F^2, \mathrm{s.t.}  G_1^T G_1=I $$
+```
 
 ### Environment
 For better reproducibility, it's recommended to refer to the following hardware and software settings:
