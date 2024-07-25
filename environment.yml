@@ -1,0 +1,10 @@
+name: env_INMTD
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.*
+  - numpy
+  - scikit-learn
+  - pandas
+  - scipy
+  - matplotlib
