@@ -1,13 +1,13 @@
 # INMTD
 Integrative Non-negative Matrix and Tensor Decomposition
-
+![model_illustration.png]
 INMTD (**I**ntegrative **N**on-negative **M**atrix and **T**ensor **D**ecomposition) is a novel multi-view clustering method which integrates 2D and 3D datasets for joint clustering and removes confounding effects. It learns an embedding matrix for each data dimension and subgroups the individuals from their embedding after removing vectors in the embedding space that are linked with confounders. More specifically, INMTD combines nonnegative matrix tri-factorization (NMTF) [1] and nonnegative Tucker decomposition (NTD) [2] to cluster subjects with multi-view data regardless of their dimensionality. We assume $p_1$ subjects described by two data views, a 2D matrix $`X_{12} \in \mathbb{R}_{+}^{p_1 \times p_2}`$ of $p_2$ features and a 3D tensor $`\mathcal{X}_{134} \in \mathbb{R}_{+}^{p_1 \times p_3 \times p_4}`$ of $p_3$ features with $p_4$ channels, both nonnegative. The aim of our method is to jointly compute the embedding matrices for each dimension and cluster the $p_1$ subjects based on its specific embedding.
 The objective function of INMTD is as follows:
 ```math
 \min_{G_i \geq 0, S_{12} \geq 0, S_{134} \geq 0}⁡ J = \| X_{12} - G_1 S_{12} G_2^T \|_F^2 + \| \mathcal{X}_{134} - \mathcal{S}_{134} ×_1 G_1 ×_2 G_3 ×_3 G_4 \|_F^2, \quad \mathrm{s.t.} \quad G_1^T G_1=I
 ```
 
-### Environment
+## Environment
 For better reproducibility, it's recommended to refer to the following hardware and software settings:
 ```
 Operating system: Ubuntu 20.04.6 LTS
@@ -21,18 +21,18 @@ The required packages can be installed with the conda environment file in this r
 conda env create -f environment.yml
 ```
 
-### Tutorial
+## Tutorial
 To use INMTD, please download the code files from this Github repository to your local. 
 In `INMTD.py` there are 3 important functions for users to properly run INMTD:
 ```
 init_G(R12, R13, c1, c2, c3, c4, method)
 ```
-# Description
+### Description
 Initialize embedding matrices
-# Parameters
+### Parameters
 
 
-### Usage
+## Usage
 There're 2 ways to use netMUG: call the all-in-one-go function or break it down to steps.
 #### Strategy 1: all-in-one-go function
 ```
