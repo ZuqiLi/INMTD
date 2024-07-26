@@ -16,6 +16,7 @@ For better reproducibility, it's recommended to refer to the following hardware 
 - Memory: 767 GiB
 - Graphics: llvmpipe (LLVM 12.0.0, 256 bits)
 - Python version: 3.9.7
+
 The required packages can be installed with the conda environment file in this repository:
 ```
 conda env create -f environment.yml
@@ -25,12 +26,14 @@ conda env create -f environment.yml
 To use INMTD, please download the code files from this Github repository to your local. 
 In `INMTD.py` there are 3 important functions for users to properly run INMTD:
 ```
-init_G(R12, R13, c1, c2, c3, c4, method)
+init_G(R12, R13, r1, r2, r3, r4, method)
 ```
 ### Description
-Initialize embedding matrices
-### Parameters
+Initialize embedding matrices $G_1$, $G_2$, $G_3$, and $G_4$.
 
+### Parameters
+- `R12`: a 2D numpy array of size $p_1 \times p_2$.
+- `R13`: a 3D numpy array of size $p_1 \times p_3 \times p_4$.
 
 ## Usage
 There're 2 ways to use netMUG: call the all-in-one-go function or break it down to steps.
