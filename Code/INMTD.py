@@ -1,7 +1,3 @@
-import os
-os.environ["OMP_NUM_THREADS"] = "5"
-os.environ["MKL_NUM_THREADS"] = "5"
-
 import numpy as np
 import numpy.ma as ma
 from numpy.linalg import multi_dot, svd
