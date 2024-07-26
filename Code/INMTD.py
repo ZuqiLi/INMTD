@@ -15,67 +15,65 @@ def onehot(x):
     return(X)
 
 
-def init_G(R12, R13, c1, c2, c3, c4, method):
-    # R: n x p
-    # G: n x k
+def init_G(R12, R13, r1, r2, r3, r4, method):
     if isinstance(R12, pd.DataFrame): R12 = R12.to_numpy()
     if isinstance(R13, pd.DataFrame): R13 = R13.to_numpy()
 
     if method == 'random': # Random initialization
-        G1 = np.random.uniform(low = 0, high = 1, size = (R12.shape[0], c1))
-        G2 = np.random.uniform(low = 0, high = 1, size = (R12.shape[1], c2))
-        G3 = np.random.uniform(low = 0, high = 1, size = (R13.shape[1], c3))
-        G4 = np.random.uniform(low = 0, high = 1, size = (R13.shape[2], c4))
+        G1 = np.random.uniform(low = 0, high = 1, size = (R12.shape[0], r1))
+        G2 = np.random.uniform(low = 0, high = 1, size = (R12.shape[1], r2))
+        G3 = np.random.uniform(low = 0, high = 1, size = (R13.shape[1], r3))
+        G4 = np.random.uniform(low = 0, high = 1, size = (R13.shape[2], r4))
     elif method == 'kmeans': # K-means initialization
-        km1 = KMeans(n_clusters=c1, n_init=10, random_state=1).fit(R12)
-        km2 = KMeans(n_clusters=c2, n_init=10, random_state=1).fit(R12.T)
-        km3 = KMeans(n_clusters=c3, n_init=10, random_state=1).fit(R13.T)
+        km1 = KMeans(n_clusters=r1, n_init=10, random_state=1).fit(R12)
+        km2 = KMeans(n_clusters=r2, n_init=10, random_state=1).fit(R12.T)
+        km3 = KMeans(n_clusters=r3, n_init=10, random_state=1).fit(R13.T)
         G1 = onehot(km1.labels_)
         G2 = onehot(km2.labels_)
         G3 = onehot(km3.labels_)
     elif method == 'acol': # ACOL initialization
         R12cp = np.random.permutation(R12.shape[1]) # shuffle over columns of R
-        idxs = np.array_split(R12cp, c1) # split by column
+        idxs = np.array_split(R12cp, r1) # split by column
         subs = [np.mean(R12[:,idx], axis=1) for idx in idxs] # average columns in each subset
         G1 = np.vstack(subs).T
 
         R12rp = np.random.permutation(R12.shape[0]) # shuffle over rows of R
-        idxs = np.array_split(R12rp, c2) # split by row
+        idxs = np.array_split(R12rp, r2) # split by row
         subs = [np.mean(R12[idx,:], axis=0) for idx in idxs] # average rows in each subset
         G2 = np.vstack(subs).T
         
         R13rp = np.random.permutation(R13.shape[0]) # shuffle over rows of R
-        idxs = np.array_split(R13rp, c3) # split by row
+        idxs = np.array_split(R13rp, r3) # split by row
         subs = [np.mean(R13[idx,:], axis=0) for idx in idxs] # average rows in each subset
         G3 = np.vstack(subs).T
     elif method == 'svd': # SVD initialization
         u, s, vh = svd(R12, full_matrices=False)
-        G12 = u[:, :c1]
-        G2 = vh.T[:, :c2]
+        G12 = u[:, :r1]
+        G2 = vh.T[:, :r2]
         G12[G12 <= 0] = 1e-5
         G2[G2 <= 0] = 1e-5
         u, s, vh = svd(np.transpose(R13, (2,0,1)), full_matrices=False) # permute -> 3 x N x L
-        G13 = np.mean(u[:,:,:c1], axis=0)
-        G3 = np.mean(vh[:,:c3,:], axis=0).T
+        G13 = np.mean(u[:,:,:r1], axis=0)
+        G3 = np.mean(vh[:,:r3,:], axis=0).T
         G13[G13 <= 0] = 1e-5
         G3[G3 <= 0] = 1e-5
         u, s, vh = svd(R13, full_matrices=False)
-        G4 = np.mean(vh[:,:c4,:], axis=0).T
+        G4 = np.mean(vh[:,:r4,:], axis=0).T
         G4[G4 <= 0] = 1e-5
         G1 = (G12 + G13) / 2 # G1 is the average of the intialization from both datasets
     elif method == 'rsvd': # random SVD initialization for G2 and normal SVD for the others
-        u, s, vh = rsvd(R12, n_components=c2, n_oversamples=10, random_state=0)
-        G12 = u[:, :c1]
-        G2 = vh.T[:, :c2]
+        u, s, vh = rsvd(R12, n_components=r2, n_oversamples=10, random_state=0)
+        G12 = u[:, :r1]
+        G2 = vh.T[:, :r2]
         G12[G12 <= 0] = 1e-5
         G2[G2 <= 0] = 1e-5
         u, s, vh = svd(np.transpose(R13, (2,0,1)), full_matrices=False) # permute -> 3 x N x L
-        G13 = np.mean(u[:,:,:c1], axis=0)
-        G3 = np.mean(vh[:,:c3,:], axis=0).T
+        G13 = np.mean(u[:,:,:r1], axis=0)
+        G3 = np.mean(vh[:,:r3,:], axis=0).T
         G13[G13 <= 0] = 1e-5
         G3[G3 <= 0] = 1e-5
         u, s, vh = svd(R13, full_matrices=False)
-        G4 = np.mean(vh[:,:c4,:], axis=0).T
+        G4 = np.mean(vh[:,:r4,:], axis=0).T
         G4[G4 <= 0] = 1e-5
         G1 = (G12 + G13) / 2 # G1 is the average of the intialization from both datasets
     else:
@@ -289,14 +287,14 @@ def stability(labels):
     return(np.mean(RI))
 
 
-def find_best_c1(R12, R13, c1_list, c2, c3, c4, n_init=10, stop=200):
-    for c1 in c1_list:
+def find_best_r1(R12, R13, r1_list, r2, r3, r4, n_init=10, stop=200):
+    for r1 in r1_list:
         labels = []
         metrics = np.zeros((n_init,4)) # [stability, dispersion, Silhouette(R12), Silhouette(R13)]
         for i in range(n_init):
-            print(c1, "clusters - Run:", i+1, "......")
+            print(r1, "clusters - Run:", i+1, "......")
             # Initialize embedding matrices
-            G1, G2, G3, G4 = init_G(R12, R13, c1, c2, c3, c4, method='random')
+            G1, G2, G3, G4 = init_G(R12, R13, r1, r2, r3, r4, method='random')
             # Initialize core matrices
             S12 = R12.dot(G2)
             S12 = G1.T.dot(S12)
@@ -326,10 +324,10 @@ def find_best_c1(R12, R13, c1_list, c2, c3, c4, n_init=10, stop=200):
         metrics[i, 0] = score
         print("Stability =", score)
         C = co_occur_mat(labels)
-        score = dispersion(C, c1)
+        score = dispersion(C, r1)
         metrics[i, 1] = score
         print("Dispersion coefficient =", score)
-        sc = SpectralClustering(c1, n_init=10, affinity='precomputed', assign_labels='kmeans').fit(C)
+        sc = SpectralClustering(r1, n_init=10, affinity='precomputed', assign_labels='kmeans').fit(C)
         label = sc.labels_
         #label = labels[0]
         score = silhouette_score(R12, label)
@@ -342,18 +340,18 @@ def find_best_c1(R12, R13, c1_list, c2, c3, c4, n_init=10, stop=200):
     print('=========================================================')
     best = np.argmax(metrics[:,0])
     print("The highest stability =", metrics[best,0])
-    print("The best c1 =", c1_list[best])
+    print("The best r1 =", r1_list[best])
 
-    return c1_list[best]
+    return r1_list[best]
 
 
-def INMTD(R12, R13, c1, c2, c3, c4, stop=500, eps=1e-6):
+def INMTD(R12, R13, r1, r2, r3, r4, stop=500, eps=1e-6):
     # Compute the norm of R12 and R13
     normR12 = np.linalg.norm(R12, ord = 'fro')
     normR13 = np.linalg.norm(R13, ord=None)
 
     # Initialize embedding matrices
-    G1, G2, G3, G4 = init_G(R12, R13, c1, c2, c3, c4, method='svd')
+    G1, G2, G3, G4 = init_G(R12, R13, r1, r2, r3, r4, method='svd')
     print(G1.shape, G2.shape, G3.shape, G4.shape)
     # Initialize core matrices
     S12 = R12.dot(G2)
