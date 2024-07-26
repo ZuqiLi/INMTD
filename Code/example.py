@@ -1,3 +1,7 @@
+import os
+os.environ["OMP_NUM_THREADS"] = "5"
+os.environ["MKL_NUM_THREADS"] = "5"
+
 from simulation import generate_data
 from INMTD import INMTD
 import numpy as np
