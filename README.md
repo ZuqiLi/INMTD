@@ -15,22 +15,22 @@ Processor: Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz
 Memory: 767 GiB
 Graphics: llvmpipe (LLVM 12.0.0, 256 bits)
 Python version: 3.9.7
-RStudio version: 2022.07.1+554
+```
+The required packages can be installed with the conda environment file in this repository:
+```
+conda env create -f environment.yml
 ```
 
-### Installation
-Before using netMUG in your R environment, please download the code files from this Github repository in R:
+### Tutorial
+To use INMTD, please download the code files from this Github repository to your local. 
+In `INMTD.py` there are 3 important functions for users to properly run INMTD:
 ```
-# Download netMUG functions
-if (!require("devtools")) install.packages("devtools")
-library(devtools)
-source_url("https://raw.githubusercontent.com/ZuqiLi/netMUG/main/R/netMUG.R")
+init_G(R12, R13, c1, c2, c3, c4, method)
 ```
-The current netMUG is developed under R version 4.2.1 with the following packages:
-- parallel (4.2.1)
-- devtools (2.4.3)
-- dynamicTreeCut (1.63.1)
-- SmCCNet (0.99.0)
+# Description
+Initialize embedding matrices
+# Parameters
+
 
 ### Usage
 There're 2 ways to use netMUG: call the all-in-one-go function or break it down to steps.
