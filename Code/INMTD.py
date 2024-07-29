@@ -345,7 +345,7 @@ def find_best_r1(R12, R13, r1_list, r2, r3, r4, n_init=10, stop=200):
     return r1_list[best]
 
 
-def INMTD(R12, R13, r1, r2, r3, r4, init='svd', stop=500, eps=1e-6):
+def INMTD(R12, R13, r1, r2, r3, r4, init='svd', stop=500):
     # Compute the norm of R12 and R13
     normR12 = np.linalg.norm(R12, ord = 'fro')
     normR13 = np.linalg.norm(R13, ord=None)
@@ -362,7 +362,7 @@ def INMTD(R12, R13, r1, r2, r3, r4, init='svd', stop=500, eps=1e-6):
 
     # Start optimization and stop when meet the criteria
     niter = 0
-    Js, J12s, J13s, REs, RE12s, RE13s, crits = [], [], [], [], [], [], [1]
+    Js, J12s, J13s, REs, RE12s, RE13s = [], [], [], [], [], []
     # Compute objective function
     J12, J13 = frob_norm(R12, R13, G1, G2, G3, G4, S12, S13)
     J12s.append(J12)
@@ -400,16 +400,10 @@ def INMTD(R12, R13, r1, r2, r3, r4, init='svd', stop=500, eps=1e-6):
             RE13s.append(RE13)
             RE = RE12 + RE13
             REs.append(RE)
-            crit = abs(Js[-2] - Js[-1]) / Js[-2]
-            crits.append(crit)
-            print("  Iter:", niter, "\tJ =", J, "=", [J12, J13], 
-                    "\tRel err:", RE, "\tStop crit:", crit)
-
-        # stopping criterion
-        #if crit < eps: break
+            print("  Iter:", niter, "\tJ =", J, "=", [J12, J13], "\tRel err:", RE)
 
     embedding = {'G1':G1, 'G2':G2, 'G3':G3, 'G4':G4, 'S12':S12, 'S13':S13}
-    logging = np.array([Js, J12s, J13s, REs, RE12s, RE13s, crits]).T
+    logging = np.array([Js, J12s, J13s, REs, RE12s, RE13s]).T
 
     return embedding, logging
 
