@@ -6,23 +6,23 @@ def onehot(x):
     X[np.arange(x.size), x] = 1
     return(X)
 
-def generate_data(Ps, Cs):
+def generate_data(Ps, Rs):
     np.random.seed(1)
     p1, p2, p3, p4 = Ps
-    c1, c2, c3, c4 = Cs
+    r1, r2, r3, r4 = Cs
 
-    clust_1 = np.random.choice(c1, size=p1, replace=True)
-    clust_2 = np.random.choice(c2, size=p2, replace=True)
-    clust_3 = np.random.choice(c3, size=p3, replace=True)
-    clust_4 = np.random.choice(c4, size=p4, replace=True)
+    clust_1 = np.random.choice(r1, size=p1, replace=True)
+    clust_2 = np.random.choice(r2, size=p2, replace=True)
+    clust_3 = np.random.choice(r3, size=p3, replace=True)
+    clust_4 = np.random.choice(r4, size=p4, replace=True)
 
-    G1 = onehot(clust_1)# + np.abs(np.random.normal(0, 0.1, size=(p1, c1)))
-    G2 = onehot(clust_2)# + np.abs(np.random.normal(0, 0.1, size=(p2, c2)))
-    G3 = onehot(clust_3)# + np.abs(np.random.normal(0, 0.1, size=(p3, c3)))
-    G4 = onehot(clust_4)# + np.abs(np.random.normal(0, 0.1, size=(p4, c4)))
+    G1 = onehot(clust_1)# + np.abs(np.random.normal(0, 0.1, size=(p1, r1)))
+    G2 = onehot(clust_2)# + np.abs(np.random.normal(0, 0.1, size=(p2, r2)))
+    G3 = onehot(clust_3)# + np.abs(np.random.normal(0, 0.1, size=(p3, r3)))
+    G4 = onehot(clust_4)# + np.abs(np.random.normal(0, 0.1, size=(p4, r4)))
 
-    S12 = np.random.uniform(0, 1, size=(c1, c2))
-    S134 = np.random.uniform(0, 1, size=(c1, c3, c4))
+    S12 = np.random.uniform(0, 1, size=(r1, r2))
+    S134 = np.random.uniform(0, 1, size=(r1, r3, r4))
 
     R12 = G1 @ S12 @ G2.T
     R134 = np.einsum('ijk,ni->njk', S134, G1)
@@ -37,14 +37,5 @@ def generate_data(Ps, Cs):
     #R134 = np.abs(R134)
 
     return(R12, R134, clust_1, clust_2, clust_3, clust_4)
-
-
-
-
-
-
-
-
-
 
 
