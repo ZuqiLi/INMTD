@@ -345,13 +345,13 @@ def find_best_r1(R12, R13, r1_list, r2, r3, r4, n_init=10, stop=200):
     return r1_list[best]
 
 
-def INMTD(R12, R13, r1, r2, r3, r4, stop=500, eps=1e-6):
+def INMTD(R12, R13, r1, r2, r3, r4, init='svd', stop=500, eps=1e-6):
     # Compute the norm of R12 and R13
     normR12 = np.linalg.norm(R12, ord = 'fro')
     normR13 = np.linalg.norm(R13, ord=None)
 
     # Initialize embedding matrices
-    G1, G2, G3, G4 = init_G(R12, R13, r1, r2, r3, r4, method='svd')
+    G1, G2, G3, G4 = init_G(R12, R13, r1, r2, r3, r4, method=init)
     print(G1.shape, G2.shape, G3.shape, G4.shape)
     # Initialize core matrices
     S12 = R12.dot(G2)
