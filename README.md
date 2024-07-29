@@ -3,7 +3,7 @@ Integrative Non-negative Matrix and Tensor Decomposition
 
 ![model2](https://github.com/user-attachments/assets/0cdeb77f-8d3a-454c-9018-264becdd160e)
 
-INMTD (**I**ntegrative **N**on-negative **M**atrix and **T**ensor **D**ecomposition) is a novel multi-view clustering method which integrates 2D and 3D datasets for joint clustering and removes confounding effects. It learns an embedding matrix for each data dimension and subgroups the individuals from their embedding after removing vectors in the embedding space that are linked with confounders. More specifically, INMTD combines nonnegative matrix tri-factorization (NMTF)[^1] and nonnegative Tucker decomposition (NTD)[^2] to cluster subjects with multi-view data regardless of their dimensionality. We assume $p_1$ subjects described by two data views, a 2D matrix $`X_{12} \in \mathbb{R}_{+}^{p_1 \times p_2}`$ of $p_2$ features and a 3D tensor $`\mathcal{X}_{134} \in \mathbb{R}_{+}^{p_1 \times p_3 \times p_4}`$ of $p_3$ features with $p_4$ channels, both nonnegative. The aim of our method is to jointly compute the embedding matrices for each dimension and cluster the $p_1$ subjects based on its specific embedding.
+INMTD (**I**ntegrative **N**on-negative **M**atrix and **T**ensor **D**ecomposition) is a novel multi-view clustering method which integrates 2D and 3D datasets for joint clustering and removes confounding effects. It learns an embedding matrix for each data dimension and subgroups the individuals from their embedding after removing vectors in the embedding space that are linked with confounders. More specifically, INMTD combines nonnegative matrix tri-factorization (NMTF) [1] and nonnegative Tucker decomposition (NTD) [2] to cluster subjects with multi-view data regardless of their dimensionality. We assume $p_1$ subjects described by two data views, a 2D matrix $`X_{12} \in \mathbb{R}_{+}^{p_1 \times p_2}`$ of $p_2$ features and a 3D tensor $`\mathcal{X}_{134} \in \mathbb{R}_{+}^{p_1 \times p_3 \times p_4}`$ of $p_3$ features with $p_4$ channels, both nonnegative. The aim of our method is to jointly compute the embedding matrices for each dimension and cluster the $p_1$ subjects based on its specific embedding.
 The objective function of INMTD is as follows:
 ```math
 \min_{G_i \geq 0, S_{12} \geq 0, S_{134} \geq 0}⁡ J = \| X_{12} - G_1 S_{12} G_2^T \|_F^2 + \| \mathcal{X}_{134} - \mathcal{S}_{134} ×_1 G_1 ×_2 G_3 ×_3 G_4 \|_F^2, \quad \mathrm{s.t.} \quad G_1^T G_1=I
@@ -89,43 +89,119 @@ Run the INMTD model to joint decompose 2D and 3D datasets.
 Here is an example of how to run INMTD with simulated data. Functions and example datasets of the simulation can be found in the `Simulation` folder.
 ### Simulation
 ```
-# The first data view of shape [n x p1]
-X <- matrix(runif(5000), nrow=100)
-# The second data view of shape [n x p2]
-Y <- matrix(runif(4000), nrow=100)
-# The extraneous variable of shape [n]
-Z <- runif(100)
-# l1, l2 are the sparsity parameters (more explanation can be found in SmCCNet)
-l1 <- 0.2
-l2 <- 0.2
-# s1, s2 are the subsampling parameters (more explanation can be found in SmCCNet)
-s1 <- 0.8
-s2 <- 0.9
+from simulation import generate_data
 
-# netMUG returns a list: the selected features from X, the selected features from Y, ISNs, and the final clustering
-res <- netMUG(X, Y, Z, l1, l2, s1, s2)
+p1, p2, p3, p4 = 1000, 250, 80, 20
+r1, r2, r3, r4 = 5, 10, 4, 2
+
+R12, R13, clust1, clust2, clust3, clust4 = generate_data([p1, p2, p3, p4], [r1, r2, r3, r4])
 ```
+The `generate_data` function in `simulation.py` takes 2 parameters as input. The first parameter is a list containing the numbers of dimensions of the 2 datasets to be simulated, namely `R12` and `R13`. The second parameter is another list containing the ranks of the embedding matrices composing `R12` and `R13`. It returns the 2D matrix `R12`, the 3D tensor `R13`, the true clustering on the dimension of `p1`, the true clustering on the dimension of `p2`, the true clustering on the dimension of `p3`, and the true clustering on the dimension of `p4`.
+
 ### INMTD pipeline
 ```
-# Step 1: select multi-view features informed by an extraneous variable
-smccnet <- selectFeatures(X, Y, Z, l1, l2, s1, s2)
-Xsub <- X[, smccnet$featureX]
-Ysub <- Y[, smccnet$featureY]
+from INMTD import INMTD
+import numpy as np
 
-# Step 2: build ISNs from the selected features
-V <- cbind(Xsub, Ysub)
-ISNs <- buildInfISNs(V, Z, nCores = 1)
-
-# Step 3: compute distances between ISNs
-dis <- computeDist(ISNs)
-
-# Step 4: Ward's hierarchical clustering with Dynamic Tree Cut
-dendro <- hclust(as.dist(dis), method = "ward.D2")
-clust <- cutreeDynamic(dendro, minClusterSize = 1, distM = dis, 
-                      deepSplit = 0)
-clust <- as.factor(clust)
+embedding, logging = INMTD(R12, R13, r1, r2, r3, r4)
+print(logging)
 ```
+Run INMTD model on the simulated data to derive the learnt embeddings.
+
+&nbsp;
+```
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score
+
+G1 = embedding['G1']
+G1_scaled = StandardScaler().fit_transform(G1)
+G1_clust = KMeans(n_clusters=r1, n_init=10, max_iter=300, random_state=123).fit(G1_scaled).labels_
+G1_score = adjusted_rand_score(clust1, G1_clust)
+print("ARI for KMeans on G1:", G1_score)
+
+G2 = embedding['G2']
+G2_scaled = StandardScaler().fit_transform(G2)
+G2_clust = KMeans(n_clusters=r2, n_init=10, max_iter=300, random_state=123).fit(G2_scaled).labels_
+G2_score = adjusted_rand_score(clust2, G2_clust)
+print("ARI for KMeans on G2:", G2_score)
+
+G3 = embedding['G3']
+G3_scaled = StandardScaler().fit_transform(G3)
+G3_clust = KMeans(n_clusters=r3, n_init=10, max_iter=300, random_state=123).fit(G3_scaled).labels_
+G3_score = adjusted_rand_score(clust3, G3_clust)
+print("ARI for KMeans on G3:", G3_score)
+
+G4 = embedding['G4']
+G4_scaled = StandardScaler().fit_transform(G4)
+G4_clust = KMeans(n_clusters=r4, n_init=10, max_iter=300, random_state=123).fit(G4_scaled).labels_
+G4_score = adjusted_rand_score(clust4, G4_clust)
+print("ARI for KMeans on G4:", G4_score)
+```
+Cluster each dimension based on the corresponding embedding and compute the adjusted Rand index to assess how good the clustering is with respect to the true clustering.
+
+&nbsp;
+```
+from sklearn.metrics.pairwise import cosine_similarity
+
+S12 = embedding['S12']
+S13 = embedding['S13']
+
+# Map G2 and G3 to the space of G1
+S12G2 = S12.dot(G2.T)
+S13G3 = np.einsum('ijk,pj->ipk', S13, G3)
+S13G3 = np.mean(S13G3, axis=2) # convert from 3D to 2D by averaging along the last axis
+print("S12*G2 shape:", S12G2.shape)
+print("S13*G3 shape:", S13G3.shape)
+
+# Concatenation
+merged = np.concatenate((StandardScaler().fit_transform(S12G2.T), StandardScaler().fit_transform(S13G3.T)), axis=0)
+print("Concatenation shape:", merged.shape)
+
+# Compute centroid of G1 clusters
+G1cent = np.array([np.mean(G1[np.where(G1_clust == i)[0], :], axis=0) for i in range(r1)])
+merged = np.concatenate((merged, StandardScaler().fit_transform(G1cent)), axis=0)
+print("Concatenation shape:", merged.shape)
+
+# Cosine similarity between each G2 feature and each G1 cluster centroid
+G2simG1cent = cosine_similarity(merged[:p2,:], merged[-r1:,:])
+print("G2simG1cent shape:", G2simG1cent.shape)
+#G2simG1cent = np.max(G2simG1cent, axis=1) # the highest similarity of each G2 feature across all centroids
+#G2_select = np.argsort(-G2simG1cent, axis=None)[:10] # select the top 10 G2 features
+
+# Cosine similarity between each G3 feature and each G1 cluster centroid
+G3simG1cent = cosine_similarity(merged[p2:-r1,:], merged[-r1:,:])
+print("G3simG1cent shape:", G3simG1cent.shape)
+#G3simG1cent = np.max(G3simG1cent, axis=1) # the highest similarity of each G3 feature across all centroids
+#G3_select = np.argsort(-G3simG1cent, axis=None)[:10] # select the top 10 G3 features
+```
+Link $G_2$ and $G_3$ by projecting them to the common space of $G_1$. Every cluster from $G_1$ can be characterized by selecting features in $G_2$ and features in $G_3$ with highest cosine similarity to the cluster centroids in the joint space.
+
+&nbsp;
+```
+from sklearn.decomposition import PCA, KernelPCA
+import matplotlib.pyplot as plt
+
+# Dimensionality reduction
+#reducer = PCA(n_components=2)
+reducer = KernelPCA(n_components=2, kernel='cosine')
+embedding = reducer.fit_transform(merged)
+print("PC shape:", embedding.shape)
+#print("Explained variance ratio:", reducer.explained_variance_ratio_)
+
+# Plot G2 features, G3 features and G1 cluster centroids in the common space
+fig, ax = plt.subplots(figsize=(11, 9))
+plt.scatter(embedding[:, 0], embedding[:, 1],
+    #c=np.repeat(['orange','blue'], [n_lms, n_lms]))
+    c=np.repeat(['orange','blue','red'], [p2, p3, r1]))
+plt.gca().set_aspect('equal', 'datalim')
+plt.xlabel('The 1st principal component', fontsize=18)
+plt.ylabel('The 2nd principal component', fontsize=18)
+plt.show()
+```
+Plot all the features in $G_2$, features in $G_3$ and the cluster centroids of $G_1$ in a 2D space reduced by PCA with cosine kernel.
+
 ## Acknowledgement
 ## References
-> [^1] Ding, C., Li, T., Peng, W. & Park, H. Orthogonal nonnegative matrix t-factorizations for clustering. in Proceedings of the 12th ACM SIGKDD international conference on Knowledge discovery and data mining 126–135 (ACM, Philadelphia PA USA, 2006).\
-> [^2] Kim, Y.-D. & Choi, S. Nonnegative Tucker Decomposition. in 2007 IEEE Conference on Computer Vision and Pattern Recognition 1–8 (IEEE, Minneapolis, MN, USA, 2007).\
+> [1] Ding, C., Li, T., Peng, W. & Park, H. Orthogonal nonnegative matrix t-factorizations for clustering. in Proceedings of the 12th ACM SIGKDD international conference on Knowledge discovery and data mining 126–135 (ACM, Philadelphia PA USA, 2006).\
+> [2] Kim, Y.-D. & Choi, S. Nonnegative Tucker Decomposition. in 2007 IEEE Conference on Computer Vision and Pattern Recognition 1–8 (IEEE, Minneapolis, MN, USA, 2007).\
