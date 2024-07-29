@@ -91,6 +91,7 @@ Here is an example of how to run INMTD with simulated data. Functions and exampl
 ```
 from simulation import generate_data
 
+
 p1, p2, p3, p4 = 1000, 250, 80, 20
 r1, r2, r3, r4 = 5, 10, 4, 2
 
@@ -103,6 +104,7 @@ The `generate_data` function in `simulation.py` takes 2 parameters as input. The
 from INMTD import INMTD
 import numpy as np
 
+
 embedding, logging = INMTD(R12, R13, r1, r2, r3, r4)
 print(logging)
 ```
@@ -113,6 +115,7 @@ Run INMTD model on the simulated data to derive the learnt embeddings.
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
+
 
 G1 = embedding['G1']
 G1_scaled = StandardScaler().fit_transform(G1)
@@ -143,6 +146,7 @@ Cluster each dimension based on the corresponding embedding and compute the adju
 &nbsp;
 ```
 from sklearn.metrics.pairwise import cosine_similarity
+
 
 S12 = embedding['S12']
 S13 = embedding['S13']
@@ -181,6 +185,7 @@ Link $G_2$ and $G_3$ by projecting them to the common space of $G_1$. Every clus
 ```
 from sklearn.decomposition import PCA, KernelPCA
 import matplotlib.pyplot as plt
+
 
 # Dimensionality reduction
 #reducer = PCA(n_components=2)
