@@ -85,9 +85,9 @@ Run the INMTD model to joint decompose 2D and 3D datasets.
 - `embedding`: A list containing embedding matrices $G_1$, $G_2$, $G_3$, $G_4$, the core matrix $S_{12}$ for `R12`, and the core tensor $\mathcal{S}_{13}$ for `R13`.
 - `logging`: A 2D numpy array with 6 columns corresponding to the joint reconstruction error of `R12` and `R13`, the reconstruction error of `R12`, the reconstruction error of `R13`, the joint relative error of `R12` and `R13`, the relative error of `R12`, and the relative error of `R13`. Rows are the recording of the 6 metrics in the first 10 iterations and every 10 iterations afterwards.
   
-## Usage
-There're 2 ways to use netMUG: call the all-in-one-go function or break it down to steps.
-#### Strategy 1: all-in-one-go function
+## Example
+Here is an example of how to run INMTD with simulated data. Functions and example datasets of the simulation can be found in the `Simulation` folder.
+### Simulation
 ```
 # The first data view of shape [n x p1]
 X <- matrix(runif(5000), nrow=100)
@@ -105,7 +105,7 @@ s2 <- 0.9
 # netMUG returns a list: the selected features from X, the selected features from Y, ISNs, and the final clustering
 res <- netMUG(X, Y, Z, l1, l2, s1, s2)
 ```
-#### Strategy 2: step-by-step pipeline
+### INMTD pipeline
 ```
 # Step 1: select multi-view features informed by an extraneous variable
 smccnet <- selectFeatures(X, Y, Z, l1, l2, s1, s2)
@@ -125,7 +125,7 @@ clust <- cutreeDynamic(dendro, minClusterSize = 1, distM = dis,
                       deepSplit = 0)
 clust <- as.factor(clust)
 ```
-### Acknowledgement
-### References
+## Acknowledgement
+## References
 > [^1] Ding, C., Li, T., Peng, W. & Park, H. Orthogonal nonnegative matrix t-factorizations for clustering. in Proceedings of the 12th ACM SIGKDD international conference on Knowledge discovery and data mining 126–135 (ACM, Philadelphia PA USA, 2006).\
 > [^2] Kim, Y.-D. & Choi, S. Nonnegative Tucker Decomposition. in 2007 IEEE Conference on Computer Vision and Pattern Recognition 1–8 (IEEE, Minneapolis, MN, USA, 2007).\
